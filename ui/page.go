@@ -206,6 +206,11 @@ type PageConfig struct {
 	// copy of the last paint would have differed, as MemoCheck(true) does for every
 	// page. It is for tests.
 	MemoCheck bool
+	// Styles replaces the recipes the page's styled controls paint with; nil uses
+	// the theme's. See Styles. It is for an application with a look of its own
+	// that keeps using Button, Checkbox, Switch, Input and Textarea rather than
+	// their Bases, and it does not affect a control given a look of its own.
+	Styles *Styles
 }
 
 // Page is a window's declaration: one tree for the whole window. A Page lives
@@ -788,6 +793,7 @@ func (p *Page) paintOnce(canvas *gfx.Canvas, bounds Rect, view func(C)) {
 		}
 	}
 	f := p.view.Begin(canvas, p.currentTheme(), bounds)
+	f.styles = p.config.Styles
 	f.page = p
 	p.ctx.page, p.ctx.f, p.ctx.nextSet = p, f, false
 	p.nodes = append(p.nodes[:0], protoNode{scope: p.root, named: true, parentNode: -1}) // node 0, the root column

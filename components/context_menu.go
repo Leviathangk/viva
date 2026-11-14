@@ -73,6 +73,11 @@ type ContextMenuOptions struct {
 	// can ask for a denser one (24, say). Group labels, separators and everything
 	// else keep their size. An icon never grows past the row.
 	RowHeight float32
+	// Unpainted, PaintPanel and PaintItem are DropdownMenuOptions' and mean the
+	// same: the menu keeps its behavior and the caller draws its surface and rows.
+	Unpainted  bool
+	PaintPanel func(canvas *gfx.Canvas, bounds gfx.Rect, theme gfx.Theme)
+	PaintItem  func(MenuItemPaint)
 }
 
 // ContextMenuItem describes one stable menu action.
@@ -146,6 +151,7 @@ func BeginContextMenu(canvas *gfx.Canvas, theme gfx.Theme, bounds gfx.Rect, opti
 		layer: options.Layer, scope: options.Scope, dismissID: options.DismissID, viewport: options.Viewport, scroll: options.Scroll,
 		key: overlayKey(options.ID, options.DismissID, options.Scope), side: options.Side, submenu: options.Submenu,
 		instant: true, labelMuted: true, rowHeight: options.RowHeight,
+		unpainted: options.Unpainted, paintPanel: options.PaintPanel, paintItem: options.PaintItem,
 	})}
 }
 
