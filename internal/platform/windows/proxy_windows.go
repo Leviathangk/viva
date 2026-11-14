@@ -73,11 +73,22 @@ func SystemProxy(target string) (*url.URL, error) {
 	defer freeWinHTTPString(config.AutoConfigURL)
 	defer freeWinHTTPString(config.Proxy)
 	defer freeWinHTTPString(config.ProxyBypass)
+	// A machine with neither auto-detection nor a PAC script has no policy to
+	// evaluate: either the static proxy is the answer, or traffic goes direct.
+	if config.AutoDetect == 0 && config.AutoConfigURL == nil {
+		if config.Proxy == nil {
+			return nil, nil
+		}
+		return parseWinHTTPProxy(utf16PtrToString(config.Proxy), target)
+	}
 	options := winHTTPAutoproxyOptions{
-		Flags:                 winHTTPAutoproxyAutoDetect | winHTTPAutoproxyConfigURL,
+		Flags:                 winHTTPAutoproxyAutoDetect,
 		AutoDetectFlags:       winHTTPAutoDetectDHCP | winHTTPAutoDetectDNS,
-		AutoConfigURL:         config.AutoConfigURL,
 		AutoLogonIfChallenged: 1,
+	}
+	if config.AutoConfigURL != nil {
+		options.Flags |= winHTTPAutoproxyConfigURL
+		options.AutoConfigURL = config.AutoConfigURL
 	}
 	pointer, err := syscall.UTF16PtrFromString(target)
 	if err != nil {
@@ -88,14 +99,28 @@ func SystemProxy(target string) (*url.URL, error) {
 		session, uintptr(unsafe.Pointer(pointer)),
 		uintptr(unsafe.Pointer(&options)), uintptr(unsafe.Pointer(&info)),
 	); ok == 0 {
-		return nil, fmt.Errorf("%w: WinHttpGetProxyForUrl: %v", ErrProxyUnavailable, callErr)
+		// Auto-detection that finds no WPAD server is the normal answer on a
+		// machine without one: the static settings, or direct, are what the
+		// system itself would use. A PAC script that fails is a policy that
+		// could not be evaluated, and is reported instead of bypassed.
+		if config.Proxy != nil {
+			return parseWinHTTPProxy(utf16PtrToString(config.Proxy), target)
+		}
+		if config.AutoConfigURL != nil {
+			return nil, fmt.Errorf("%w: WinHttpGetProxyForUrl: %v", ErrProxyUnavailable, callErr)
+		}
+		return nil, nil
 	}
 	defer freeWinHTTPString(info.Proxy)
 	defer freeWinHTTPString(info.ProxyBypass)
-	if info.AccessType == winHTTPAccessTypeNoProxy || info.Proxy == nil {
+	if info.AccessType == winHTTPAccessTypeNoProxy {
 		return nil, nil
 	}
-	return parseWinHTTPProxy(utf16PtrToString(info.Proxy), target)
+	text := utf16PtrToString(info.Proxy)
+	if text == "" && config.Proxy != nil {
+		text = utf16PtrToString(config.Proxy)
+	}
+	return parseWinHTTPProxy(text, target)
 }
 
 // utf16PtrToString reads a NUL-terminated UTF-16 string the system allocated.
