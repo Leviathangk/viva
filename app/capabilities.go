@@ -36,6 +36,9 @@ const (
 	CapabilityReduceMotion
 	CapabilitySecretStoreAsync
 	CapabilityFontRegistrationAsync
+	// CapabilityPreventSleep means PreventSleep can hold the system out of
+	// idle sleep. It does not promise a Linux session has logind to ask.
+	CapabilityPreventSleep
 )
 
 // Capabilities is a set of platform integrations.

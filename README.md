@@ -113,6 +113,10 @@ WebView and no bundled rendering runtime.
   corner of the application's Dock tile, and an empty label removes it.
 - `app.StoreSecret`/`LoadSecret`/`DeleteSecret` keep a small secret in the
   system's own store (Keychain, Credential Manager, Secret Service).
+- `app.PreventSleep` keeps the machine out of idle sleep while a transfer or a
+  remote session runs, naming the work in the system's own power diagnostics
+  (`pmset`, `powercfg`, `systemd-inhibit`). It holds no timer or goroutine, and
+  releasing it ends the request.
 - `gfx.MonoFamily` draws fixed-pitch text in any installed family and
   `app.MonospaceFamilies` lists them.
 - `Config.OnFileDrop` receives files dragged from the file manager, with the hit
