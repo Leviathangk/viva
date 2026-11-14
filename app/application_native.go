@@ -130,6 +130,8 @@ func (host nativeHost) SetProgress(fraction float32) { host.native.SetProgress(f
 
 func (host nativeHost) Quit() { host.native.Quit() }
 
+func (host nativeHost) Post(fn func()) { host.native.Post(fn) }
+
 type nativeStatusItem struct{ item platform.StatusItem }
 
 func (item nativeStatusItem) SetIcon(icon StatusIcon) error {

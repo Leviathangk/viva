@@ -151,6 +151,14 @@ func (a *gtkApplication) enqueue(function func()) {
 	a.g.idleAdd(callbacks().task, a.tasks.add(function))
 }
 
+// Post runs fn on the main loop. GLib's idle callbacks keep the order work was
+// enqueued in, and the task table takes concurrent callers under one lock.
+func (a *gtkApplication) Post(fn func()) {
+	if fn != nil {
+		a.enqueue(fn)
+	}
+}
+
 // fail ends the loop with an error, once.
 func (a *gtkApplication) fail(err error) {
 	if a.firstErr == nil {

@@ -117,6 +117,9 @@ WebView and no bundled rendering runtime.
   remote session runs, naming the work in the system's own power diagnostics
   (`pmset`, `powercfg`, `systemd-inhibit`). It holds no timer or goroutine, and
   releasing it ends the request.
+- `Application.Post` hands work a background goroutine finished to the window
+  thread: accepted functions run there in order, with no goroutine, timer or
+  blocking wait added, and no "call the loop and wait" form that could deadlock.
 - `app/proxy.SystemProxy` reports the proxy the desktop selects for an HTTP URL:
   CFNetwork on macOS, WinHTTP's automatic proxy on Windows (PAC, WPAD and the
   static settings), and the environment on Linux. A policy the platform cannot
