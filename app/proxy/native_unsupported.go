@@ -1,7 +1,7 @@
 //go:build !darwin && !windows && !linux && !(js && wasm)
 
-package app
+package proxy
 
 import "net/url"
 
-func nativeSystemProxy(*url.URL) (*url.URL, error) { return nil, ErrSystemProxyUnavailable }
+func nativeSystemProxy(*url.URL) (*url.URL, error) { return nil, ErrUnavailable }

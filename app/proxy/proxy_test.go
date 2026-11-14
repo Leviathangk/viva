@@ -1,4 +1,4 @@
-package app
+package proxy
 
 import (
 	"net/url"
